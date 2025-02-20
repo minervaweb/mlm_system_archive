@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Collapsible User Tree</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+.user-row { cursor: pointer; }
+.collapsed { display: none; }
+.icon-column { width: 20px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>User Hierarchy</h1>
+    <table class="table table-striped" id="userTable">
+        <thead>
+            <tr>
+                <th></th>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Parent ID</th>
+                <th>Points</th>
+                <th>Money</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+const userTableBody = document.getElementById('userTableBody');
+
+// Sample user data (REPLACE WITH YOUR DATA FETCHING MECHANISM)  Now includes points and money
+const userData = [
+    { userId: 1, name: 'User 1', parentId: null, children: [], points: 100, money: 15.50 },
+    { userId: 2, name: 'User 2', parentId: 1, children: [], points: 50, money: 7.25 },
+    { userId: 3, name: 'User 3', parentId: 1, children: [], points: 150, money: 22.00 },
+    { userId: 4, name: 'User 4', parentId: 2, children: [], points: 75, money: 10.75 },
+    { userId: 5, name: 'User 5', parentId: 2, children: [], points: 25, money: 3.50 },
+    { userId: 6, name: 'User 6', parentId: 3, children: [], points: 200, money: 30.00 },
+    { userId: 7, name: 'User 7', parentId: 4, children: [], points: 100, money: 15.00 },
+    { userId: 8, name: 'User 8', parentId: 4, children: [], points: 125, money: 18.75 },
+    { userId: 9, name: 'User 9', parentId: 6, children: [], points: 175, money: 26.25 },
+];
+
+//Organize data into a tree structure
+function buildTree(data) {
+    const tree = {};
+    data.forEach(item => {
+        tree[item.userId] = item;
+    });
+    data.forEach(item => {
+        if (item.parentId) {
+            tree[item.parentId].children.push(item);
+        }
+    });
+    return tree;
+}
+
+const userTree = buildTree(userData);
+
+
+function createRow(user) {
+    const icon = user.children.length > 0 ? "&#x25B6;" : "";  //Initial icon
+    const row = userTableBody.insertRow();
+    row.classList.add('user-row');
+    row.classList.add('collapsed'); 
+    row.dataset.userId = user.userId;
+    row.innerHTML = `
+        <td class="icon-column">${icon}</td>
+        <td>${user.userId}</td>
+        <td>${user.name}</td>
+        <td>${user.parentId || ''}</td>
+        <td>${user.points}</td>
+        <td>${user.money.toFixed(2)}</td> 
+    `;
+    if (user.children.length > 0) {
+        row.addEventListener('click', toggleChildren);
+    }
+    return row;
+}
+
+function renderChildren(user, parentRow) {
+    user.children.forEach(child => {
+        const childRow = createRow(child);
+        userTableBody.insertBefore(childRow, parentRow.nextSibling);
+        if (child.children.length > 0) {
+            renderChildren(child, childRow);
+        }
+    });
+}
+
+function toggleChildren(event) {
+    const userId = parseInt(event.target.closest('.user-row').dataset.userId, 10);
+    const user = userTree[userId];
+    const icon = event.target.closest('.user-row').querySelector('.icon-column');
+
+    //Change the icon
+    icon.innerHTML = icon.innerHTML === "&#x25B6;" ? "&#x25BC;" : "&#x25B6;";
+
+    user.children.forEach(child => {
+        const childRows = document.querySelectorAll(`.user-row[data-user-id="${child.userId}"]`);
+        childRows.forEach(childRow => {
+            childRow.classList.toggle('collapsed'); 
+        });
+    });
+}
+
+
+function renderTree(tree) {
+    for (const userId in tree) {
+        if (tree[userId].parentId === null) {
+            const rootRow = createRow(tree[userId]);
+            rootRow.classList.remove('collapsed'); 
+            if (tree[userId].children.length > 0) {
+                renderChildren(tree[userId], rootRow);
+            }
+        }
+    }
+}
+
+renderTree(userTree);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>B2B Order Form</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script>
+        // JavaScript to handle dynamic row addition, calculations, and order placement
+        $(document).ready(function() {
+            // Add new row
+            $("#addRow").click(function() {
+                let newRow = `
+<tr class="order-row">
+<td>
+<select name="product_id[]" class="form-control product-select">
+<!-- Populate with options from PHP -->
+</select>
+</td>
+<td><span class="product-description"></span></td>
+<td><input type="number" name="product_price[]" class="form-control" readonly></td>
+<td><input type="number" name="product_points[]" class="form-control" readonly></td>
+<td><input type="number" name="stock_quantity[]" class="form-control" readonly></td>
+<td><input type="number" name="product_quantity[]" class="form-control quantity-input" min="0" value="0"></td>
+<td><button type="button" class="btn btn-danger remove-row">Remove</button></td>
+</tr>`;
+                $("#orderItems").append(newRow); // Append to tbody
+                updateTotals();
+            });
+
+            // Remove row
+            $("#orderItems").on("click", ".remove-row", function() { // Use delegated event handling
+                $(this).closest("tr").remove();
+                updateTotals();
+            });
+
+            // Update totals whenever quantity changes
+            $("#orderItems").on("change", ".quantity-input", function() { // Use delegated event handling and class selector
+                updateTotals();
+            });
+
+            // Update totals whenever product selection changes
+            $("#orderItems").on("change", ".product-select", function() { // Use delegated event handling and class selector
+                let row = $(this).closest('.order-row');
+                let productId = $(this).val();
+
+                // Fetch product details (using data attributes)
+                let price = $(this).find('option:selected').data('price');
+                let points = $(this).find('option:selected').data('points');
+                let stock = $(this).find('option:selected').data('stock');
+                let description = $(this).find('option:selected').data('description'); //Added description
+
+                row.find("input[name='product_price[]']").val(price);
+                row.find("input[name='product_points[]']").val(points);
+                row.find("input[name='stock_quantity[]']").val(stock);
+                row.find(".product-description").text(description); //Added description
+                updateTotals();
+            });
+
+            function updateTotals() {
+                let totalPrice = 0;
+                let totalPoints = 0;
+                $(".order-row").each(function() { // Iterate only over order rows
+                    let quantity = parseInt($(this).find(".quantity-input").val()) || 0;
+                    let price = parseFloat($(this).find("input[name='product_price[]']").val()) || 0;
+                    let points = parseInt($(this).find("input[name='product_points[]']").val()) || 0;
+
+                    totalPrice += quantity * price;
+                    totalPoints += quantity * points;
+                });
+
+                $("#totalPrice").text(totalPrice.toFixed(2));
+                $("#totalPoints").text(totalPoints);
+            }
+        });
+        </script>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>B2B Order Form</h1>
+
+            <div class="mb-3">
+                <div class="form-group">
+                    <label for="owner" class="form-label">Owner:</label>
+                    <select id="mySelect" name="id_owner" class="form-control form-select form-select-lg" required>
+                        <option value="" disabled selected>Choose Owner ID</option>
+                        <?php
+                        foreach ($users_info as $user_info) {
+                        ?>
+                        <option value="<?= $user_info['id'] ?>"><?= $user_info['id'] ?> - <?= $user_info['nom'] ?>, <?= $user_info['prenom'] ?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ">
+                <input type="hidden" name="placer_id" value="<?php echo $placerId; ?>">
+                <input type="hidden" name="owner_id" value="<?php echo $ownerId; ?>">
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Points</th>
+                            <th>Stock</th>
+                            <th>Quantity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderItems">
+                        <!-- Initial row -->
+                        <tr class="order-row">
+                            <td>
+                                <select name="product_id[]" class="form-control product-select">
+                                    <!-- Populate with options from PHP -->
+                                </select>
+                            </td>
+                            <td><span class="product-description"></span></td>
+                            <td><input type="number" name="product_price[]" class="form-control" readonly></td>
+                            <td><input type="number" name="product_points[]" class="form-control" readonly></td>
+                            <td><input type="number" name="stock_quantity[]" class="form-control" readonly></td>
+                            <td><input type="number" name="product_quantity[]" class="form-control quantity-input" min="0" value="0"></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6">
+                                <button type="button" id="addRow" class="btn btn-success">Add Another Product</button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="row mt-4">
+                    <div class="card col-md-6 p-2">
+                        <label for="notes" class="form-label">Notes:</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-3">  <!-- Added card for better visual separation -->
+                            <div class="totals">
+                                <p><strong>Total Price:</strong> <span id="totalPrice">0.00</span></p>
+                                <p><strong>Total Points:</strong> <span id="totalPoints">0</span></p>
+                            </div>
+                            <button type="submit" name="placeOrder" class="btn btn-primary btn-block mt-2">Place Order</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,10 @@
+body {
+	font-family: 'Arial', sans-serif; /* Use a modern font */
+}
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+	background-color: #007bff; /* A nice blue */
+	color: white;
+}
+.card {
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+}

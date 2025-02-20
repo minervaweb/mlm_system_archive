@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Manage Users</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/something.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    </head>
+    <body>
+
+
+        <div class="container mt-4">
+
+            <ul class="nav nav-pills mb-3" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="nav-add-tab" data-bs-toggle="tab" data-bs-target="#nav-add"
+                        type="button" role="tab" aria-controls="nav-add" aria-selected="true">Add User</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="nav-list-tab" data-bs-toggle="tab" data-bs-target="#nav-list" type="button"
+                        role="tab" aria-controls="nav-list" aria-selected="false">List User</button>
+                </li>
+            </ul>
+
+
+            <div class="tab-content" id="myTabContent">
+
+                <div class="tab-pane fade show active" id="nav-add" role="tabpanel" aria-labelledby="nav-add-tab">
+                    <div class="container">
+
+                        <div class="card mb-4">
+                            <div class="card-header">Create Pack</div>
+                            <div class="card-body">
+                                <form id="createPackForm">
+                                    <div id="productSections">
+                                        <div class="product-list">
+                                            <select class="form-control product-select">
+                                                <option value="" disabled>Select Product</option>
+                                                <option value="product1">Product 1</option>
+                                                <option value="product2">Product 2</option>
+                                                <option value="product3">Product 3</option>
+                                            </select>
+                                            <button type="button" class="btn btn-danger remove-product">Remove</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="packTitle">Title:</label>
+                                        <input type="text" class="form-control" id="packTitle" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="packDescription">Description:</label>
+                                        <textarea class="form-control" id="packDescription" rows="3" required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="packPrice">Price:</label>
+                                        <input type="number" class="form-control" id="packPrice" step="0.01" required>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label for="packPoints">Points:</label>
+                                        <input type="number" class="form-control" id="packPoints" required>
+                                    </div>
+
+
+                                    <button type="button" class="btn btn-primary add-product-section">Add Product</button>
+                                    <br><br>
+                                    <button type="submit" class="btn btn-success">Add Pack</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-list" role="tabpanel" aria-labelledby="nav-list-tab">
+
+                <div class="card mb-4">
+                    <div class="card-header">List of Packs</div>
+                    <div class="card-body">
+ <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Points</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Product A</td>
+                    <td>This is product A</td>
+                    <td>19.99</td>
+                    <td>100</td>
+                    <td>50</td>
+                    <td><button class="btn btn-danger" data-product-id="1">Delete</button></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Product B</td>
+                    <td>This is product B</td>
+                    <td>29.99</td>
+                    <td>150</td>
+                    <td>25</td>
+                    <td><button class="btn btn-danger" data-product-id="2">Delete</button></td>
+                </tr>
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script>
+        $(document).ready(function () {
+            let productCount = 1;
+
+            $(".add-product-section").click(function () {
+                productCount++;
+                $("#productSections").append(`
+<div class="product-list">
+<select class="form-control product-select">
+<option value="">Select Product</option>
+<option value="product1">Product 1</option>
+<option value="product2">Product 2</option>
+<option value="product3">Product 3</option>
+</select>
+<button type="button" class="btn btn-danger remove-product">Remove</button>
+</div>
+`);
+            });
+
+            $("#productSections").on("click", ".remove-product", function () {
+                $(this).closest(".product-list").remove();
+            });
+
+            $("#createPackForm").submit(function (e) {
+                e.preventDefault();
+                let packData = {
+                    title: $("#packTitle").val(),
+                    description: $("#packDescription").val(),
+                    price: $("#packPrice").val(),
+                    points: $("#packPoints").val(),
+                    products: []
+                };
+
+                $(".product-select").each(function () {
+                    packData.products.push($(this).val());
+                });
+
+                console.log(packData); //Simulate backend submission
+                alert("Pack created successfully!");
+            });
+        });
+        </script>
+    </body>
+</html>
